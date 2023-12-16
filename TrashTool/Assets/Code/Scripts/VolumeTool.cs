@@ -93,11 +93,13 @@ public class VolumeTool : MonoBehaviour
         if (createCut)
         {
             createCut = false;
+            currentSlice.Clear();
 
             Collider[] nodes = Physics.OverlapBox(intersectPos, intersectSize, Quaternion.identity, editLayer);
             foreach (Collider node in nodes)
             {
                 node.GetComponent<Renderer>().material = idMat;
+                currentSlice.Add(node.GetComponent<GameObject>());
             }
         }
     }
