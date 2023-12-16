@@ -57,6 +57,13 @@ public class VolumeTool : MonoBehaviour
     /// </summary>
     public void RegenerateGrid()
     {
+        // Reset current slice volums 
+        foreach (GameObject current in currentSlice)
+        {
+            current.GetComponent<Renderer>().material = ditherMat;
+        }
+        currentSlice.Clear();
+
         GeneratOctTree();
         GenerateTrashObjs(idealVolume);
     }
