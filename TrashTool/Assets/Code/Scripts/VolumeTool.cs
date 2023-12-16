@@ -13,9 +13,28 @@ public class VolumeTool : MonoBehaviour
      * verticies 
      */
 
+    [Header("Oct Tree Generation")]
     [SerializeField] float startOctSize;
     [SerializeField] float minOctSize;
     [SerializeField] LayerMask testingLayer;
+
+    private List<OctNode> idealVolume;
+
+    [Header("Spawning")]
+    [SerializeField] GameObject templateObj;
+    [SerializeField] List<GameObject> heldObjects;
+
+    [Header("Edits")]
+    [SerializeField] bool activateEditTool;
+    [Space]
+    [SerializeField] bool createCut;
+    [SerializeField] LayerMask editLayer;
+    [SerializeField] Vector2 intersectSize;
+    [SerializeField] Vector3 intersectPos;
+    [Space]
+    [SerializeField] Material idMat;
+
+    private List<GameObject> currentSlice;
 
     [Header("Gizmos")]
     [SerializeField] DisplayStates displayState;
@@ -25,36 +44,95 @@ public class VolumeTool : MonoBehaviour
     { 
         All,
         Leafs,
-        IdealVolume
+        IdealVolume,
+        Nothing
     }
 
 
     private OctNode root;
 
-    void Start()
+    /// <summary>
+    /// Generates a volume based on collision within this tool's range 
+    /// </summary>
+    public void RegenerateGrid()
     {
         GeneratOctTree();
+        GenerateTrashObjs(idealVolume);
+    }
+
+    private void Awake()
+    {
+        idealVolume = new List<OctNode>();
+    }
+
+    void Start()
+    {
+        RegenerateGrid();
     }
 
     private void Update()
     {
         if(regenerate)
         {
-            GeneratOctTree();
+            RegenerateGrid();
             regenerate = false;
+        }
+
+        EditTool();
+    }
+
+    /// <summary>
+    /// This allows you to make 3D slices of the mesh 
+    /// to then select and edit individual volumes 
+    /// </summary>
+    private void EditTool()
+    {
+        if (!activateEditTool)
+            return;
+
+        if (createCut)
+        {
+            createCut = false;
+
+            Collider[] nodes = Physics.OverlapBox(intersectPos, intersectSize, Quaternion.identity, editLayer);
+            foreach (Collider node in nodes)
+            {
+                node.GetComponent<Renderer>().material = idMat;
+            }
+        }
+    }
+
+    private void GenerateTrashObjs(List<OctNode> nodes)
+    {
+        // Reset list 
+        if(heldObjects.Count > 0)
+        {
+            for (int i = 0; i < heldObjects.Count; i++)
+            {
+                Destroy(heldObjects[i]);
+            }
+            heldObjects.Clear();
+        }
+
+        foreach (OctNode node in nodes)
+        {
+            GameObject current = Instantiate(templateObj, node.Position, Quaternion.identity);
+            current.transform.parent = this.transform;
+
+            heldObjects.Add(current);
         }
     }
 
     private void GeneratOctTree()
     {
+        idealVolume.Clear();
+
         // What layer to stop at 
         int targetIndex = (int)Mathf.Log(startOctSize / minOctSize, 2.0f);
 
-        root = new OctNode(this.transform.position, startOctSize, 0, targetIndex, testingLayer);
-        //root.TrySubdivide();
-
+        root = new OctNode(this.transform.position, startOctSize, 0, targetIndex, testingLayer, idealVolume);
     }
-    
+
     /// <summary>
     /// This octnode is used specifically to indicate is a space is occupied 
     /// by geometry. They do not hold any objects in memory and simply help
@@ -75,7 +153,7 @@ public class VolumeTool : MonoBehaviour
         public Vector3 Position { get { return position; } }
         public float Size { get { return size; } }
 
-        public OctNode(Vector3 position, float size, int index, int stoppingIndex, LayerMask layer)
+        public OctNode(Vector3 position, float size, int index, int stoppingIndex, LayerMask layer, List<OctNode> outputList)
         {
             this.position = position;
             this.size = size;
@@ -84,17 +162,18 @@ public class VolumeTool : MonoBehaviour
 
             if (index != stoppingIndex)
             {
-                TrySubdivide(layer);
+                TrySubdivide(layer, outputList);
             }
             else
             {
                 // One last check 
                 containsCollision = Physics.CheckBox(position, Vector3.one * size / 2.0f, Quaternion.identity, layer);
-                print(position);
+                if(containsCollision)
+                    outputList.Add(this);
             }
         }
 
-        public void TrySubdivide(LayerMask layer)
+        public void TrySubdivide(LayerMask layer, List<OctNode> outputList)
         {
             if(Physics.CheckBox(position, Vector3.one * size / 2.0f, Quaternion.identity, layer))
             {
@@ -109,42 +188,50 @@ public class VolumeTool : MonoBehaviour
                     position + new Vector3(nextSize / 2.0f, nextSize / 2.0f, nextSize / 2.0f), 
                     nextSize, 
                     nextIndex, stoppingIndex,
-                    layer));
+                    layer,
+                    outputList));
                 children.Add(new OctNode(
                     position + new Vector3(nextSize / 2.0f, nextSize / 2.0f, -nextSize / 2.0f),
                     nextSize,
                     nextIndex, stoppingIndex,
-                    layer));
+                    layer,
+                    outputList));
                 children.Add(new OctNode(
                     position + new Vector3(nextSize / 2.0f, -nextSize / 2.0f, nextSize / 2.0f),
                     nextSize,
                     nextIndex, stoppingIndex,
-                    layer));
+                    layer,
+                    outputList));
                 children.Add(new OctNode(
                     position + new Vector3(nextSize / 2.0f, -nextSize / 2.0f, -nextSize / 2.0f),
                     nextSize,
                     nextIndex, stoppingIndex,
-                    layer));
+                    layer,
+                    outputList));
                 children.Add(new OctNode(
                     position + new Vector3(-nextSize / 2.0f, nextSize / 2.0f, nextSize / 2.0f),
                     nextSize,
                     nextIndex, stoppingIndex,
-                    layer));
+                    layer,
+                    outputList));
                 children.Add(new OctNode(
                     position + new Vector3(-nextSize / 2.0f, nextSize / 2.0f, -nextSize / 2.0f),
                     nextSize,
                     nextIndex, stoppingIndex, 
-                    layer));
+                    layer,
+                    outputList));
                 children.Add(new OctNode(
                     position + new Vector3(-nextSize / 2.0f, -nextSize / 2.0f, nextSize / 2.0f),
                     nextSize,
                     nextIndex, stoppingIndex,
-                    layer));
+                    layer,
+                    outputList));
                 children.Add(new OctNode(
                     position + new Vector3(-nextSize / 2.0f, -nextSize / 2.0f, -nextSize / 2.0f),
                     nextSize,
                     nextIndex, stoppingIndex,
-                    layer));
+                    layer,
+                    outputList));
             }
         }
 
@@ -192,9 +279,18 @@ public class VolumeTool : MonoBehaviour
 
     private void OnDrawGizmos()
     {
+        if(activateEditTool)
+        {
+            Gizmos.DrawWireCube(intersectPos, intersectSize);
+        }
+
+
         if (root == null)
             return;
 
-        root.GizmosRecursiveDisplay(displayState);
+        if(displayState != DisplayStates.Nothing) 
+        { 
+            root.GizmosRecursiveDisplay(displayState);
+        }
     }
 }
