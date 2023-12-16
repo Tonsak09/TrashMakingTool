@@ -405,6 +405,7 @@ MonoBehaviour:
   testingLayer:
     serializedVersion: 2
     m_Bits: 1
+  regenerate: 0
   templateObj: {fileID: 9200761668849756062, guid: affed2ec9dd877b4fa02b3e968fa213e,
     type: 3}
   heldObjects: []
@@ -414,10 +415,10 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   intersectSize: {x: 4, y: 4}
-  intersectPos: {x: 0, y: 0, z: 0}
-  idMat: {fileID: 2100000, guid: af168413225202347befe7ef1a7cd9db, type: 2}
+  intersectPos: {x: 0, y: 0, z: 0.06}
+  selectedMat: {fileID: 2100000, guid: 6d8ba930ffa263c409e6ec390b346cd9, type: 2}
+  ditherMat: {fileID: 2100000, guid: af168413225202347befe7ef1a7cd9db, type: 2}
   displayState: 3
-  regenerate: 0
 --- !u!1001 &580792210
 PrefabInstance:
   m_ObjectHideFlags: 0

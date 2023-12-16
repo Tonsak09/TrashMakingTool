@@ -21,6 +21,7 @@ public class VolumeTool : MonoBehaviour
     private List<OctNode> idealVolume;
 
     [Header("Spawning")]
+    [SerializeField] bool regenerate;
     [SerializeField] GameObject templateObj;
     [SerializeField] List<GameObject> heldObjects;
 
@@ -32,13 +33,13 @@ public class VolumeTool : MonoBehaviour
     [SerializeField] Vector2 intersectSize;
     [SerializeField] Vector3 intersectPos;
     [Space]
-    [SerializeField] Material idMat;
+    [SerializeField] Material selectedMat;
+    [SerializeField] Material ditherMat;
 
-    private List<GameObject> currentSlice;
+    public List<GameObject> currentSlice;
 
     [Header("Gizmos")]
     [SerializeField] DisplayStates displayState;
-    [SerializeField] bool regenerate;
 
     private enum DisplayStates
     { 
@@ -63,6 +64,7 @@ public class VolumeTool : MonoBehaviour
     private void Awake()
     {
         idealVolume = new List<OctNode>();
+        currentSlice = new List<GameObject>();
     }
 
     void Start()
@@ -93,13 +95,18 @@ public class VolumeTool : MonoBehaviour
         if (createCut)
         {
             createCut = false;
+
+            foreach (GameObject current in currentSlice)
+            {
+                current.GetComponent<Renderer>().material = ditherMat;
+            }
             currentSlice.Clear();
 
             Collider[] nodes = Physics.OverlapBox(intersectPos, intersectSize, Quaternion.identity, editLayer);
             foreach (Collider node in nodes)
             {
-                node.GetComponent<Renderer>().material = idMat;
-                currentSlice.Add(node.GetComponent<GameObject>());
+                node.GetComponent<Renderer>().material = selectedMat;
+                currentSlice.Add(node.gameObject);
             }
         }
     }
@@ -119,7 +126,7 @@ public class VolumeTool : MonoBehaviour
         foreach (OctNode node in nodes)
         {
             GameObject current = Instantiate(templateObj, node.Position, Quaternion.identity);
-            current.transform.parent = this.transform;
+            //current.transform.parent = this.transform;
 
             heldObjects.Add(current);
         }
