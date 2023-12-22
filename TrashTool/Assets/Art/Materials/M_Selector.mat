@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: M_Node
+  m_Name: M_Selector
   m_Shader: {fileID: -6465566751694194690, guid: 2b8379781d7531240b554b4c573a3015,
     type: 3}
   m_ValidKeywords: []
@@ -42,7 +42,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DitherTex:
-        m_Texture: {fileID: 2800000, guid: 620384df9b60241428544813dcec2f5e, type: 3}
+        m_Texture: {fileID: 2800000, guid: 2f6b22b164e830e49840dfd935a1c814, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
@@ -113,7 +113,7 @@ Material:
     - _isDither: 1
     - _isEnabled: 1
     m_Colors:
-    - _Albedo: {r: 0.4433962, g: 0.4433962, b: 0.4433962, a: 1}
+    - _Albedo: {r: 0.44262192, g: 0.8301887, b: 0.43389106, a: 1}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}

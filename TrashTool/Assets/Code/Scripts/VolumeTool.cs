@@ -29,6 +29,8 @@ public class VolumeTool : MonoBehaviour
     [Header("Edits")]
     [SerializeField] Vector2 intersectSize;
     [SerializeField] Vector3 intersectPos;
+    [SerializeField] Transform slicer;
+    [SerializeField] float sliceMoveSpeed;
     [Space]
     [SerializeField] Color selectColor;
     [SerializeField] Color unSelectColor;
@@ -153,6 +155,36 @@ public class VolumeTool : MonoBehaviour
     private void Update()
     {
         VolumeDisplay();
+
+        slicer.localScale = (Vector3)intersectSize - Vector3.forward;
+        slicer.position = intersectPos;
+
+        if (Input.GetKey(KeyCode.W))
+        {
+            intersectPos += Vector3.up * sliceMoveSpeed * Time.deltaTime;
+        }
+        else if (Input.GetKey(KeyCode.S))
+        {
+            intersectPos -= Vector3.up * sliceMoveSpeed * Time.deltaTime;
+        }
+
+        if (Input.GetKey(KeyCode.A))
+        {
+            intersectPos += Vector3.right * sliceMoveSpeed * Time.deltaTime;
+        }
+        else if (Input.GetKey(KeyCode.D))
+        {
+            intersectPos -= Vector3.right * sliceMoveSpeed * Time.deltaTime;
+        }
+
+        if (Input.GetKey(KeyCode.E))
+        {
+            intersectPos += Vector3.forward * sliceMoveSpeed * Time.deltaTime;
+        }
+        else if (Input.GetKey(KeyCode.Q))
+        {
+            intersectPos -= Vector3.forward * sliceMoveSpeed * Time.deltaTime;
+        }
 
     }
 
