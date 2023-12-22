@@ -411,13 +411,15 @@ MonoBehaviour:
   heldObjects: []
   activateEditTool: 1
   createCut: 0
+  intersectSize: {x: 4, y: 4}
+  intersectPos: {x: 0, y: 0, z: 0.06}
+  selectColor: {r: 0.22086148, g: 0.58167684, b: 0.8867924, a: 1}
+  unSelectColor: {r: 0.44313726, g: 0.44313726, b: 0.44313726, a: 1}
   editLayer:
     serializedVersion: 2
     m_Bits: 64
-  intersectSize: {x: 4, y: 4}
-  intersectPos: {x: 0, y: 0, z: 0.06}
-  selectedMat: {fileID: 2100000, guid: 6d8ba930ffa263c409e6ec390b346cd9, type: 2}
-  ditherMat: {fileID: 2100000, guid: af168413225202347befe7ef1a7cd9db, type: 2}
+  volumeDisplay: 0
+  currentSlice: []
   displayState: 3
 --- !u!1001 &580792210
 PrefabInstance:

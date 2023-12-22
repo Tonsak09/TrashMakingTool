@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using static UnityEditor.Experimental.GraphView.GraphView;
 
@@ -18,30 +19,43 @@ public class VolumeTool : MonoBehaviour
     [SerializeField] float minOctSize;
     [SerializeField] LayerMask testingLayer;
 
+    // The final leaf nodes that highlight the mesh 
     private List<OctNode> idealVolume;
 
     [Header("Spawning")]
     [SerializeField] bool regenerate;
     [SerializeField] GameObject templateObj;
-    [SerializeField] List<GameObject> heldObjects;
+    [SerializeField] List<Node> heldObjects;
 
     [Header("Edits")]
     [SerializeField] bool activateEditTool;
     [Space]
     [SerializeField] bool createCut;
-    [SerializeField] LayerMask editLayer;
     [SerializeField] Vector2 intersectSize;
     [SerializeField] Vector3 intersectPos;
     [Space]
-    [SerializeField] Material selectedMat;
-    [SerializeField] Material ditherMat;
+    [SerializeField] Color selectColor;
+    [SerializeField] Color unSelectColor;
+    [Space]
+    [SerializeField] LayerMask editLayer;
+    [SerializeField] VolumeDisplayState volumeDisplay;
 
-    public List<GameObject> currentSlice;
+    public List<Node> currentSlice;
+
+    private VolumeDisplayState holdVolumeDisplay;
+
+    private enum VolumeDisplayState
+    {
+        Solid, 
+        Dither, 
+        Selected
+    }
+
 
     [Header("Gizmos")]
-    [SerializeField] DisplayStates displayState;
+    [SerializeField] GizmosDisplayStates displayState;
 
-    private enum DisplayStates
+    private enum GizmosDisplayStates
     { 
         All,
         Leafs,
@@ -58,9 +72,9 @@ public class VolumeTool : MonoBehaviour
     public void RegenerateGrid()
     {
         // Reset current slice volums 
-        foreach (GameObject current in currentSlice)
+        foreach (Node current in currentSlice)
         {
-            current.GetComponent<Renderer>().material = ditherMat;
+            current.GetComponent<Renderer>().material.SetFloat("_isDither", 1);// = ditherMat;
         }
         currentSlice.Clear();
 
@@ -71,12 +85,15 @@ public class VolumeTool : MonoBehaviour
     private void Awake()
     {
         idealVolume = new List<OctNode>();
-        currentSlice = new List<GameObject>();
+        currentSlice = new List<Node>();
+
+        holdVolumeDisplay = volumeDisplay;
     }
 
     void Start()
     {
         RegenerateGrid();
+        VolumeDisplaySM();
     }
 
     private void Update()
@@ -88,6 +105,96 @@ public class VolumeTool : MonoBehaviour
         }
 
         EditTool();
+        VolumeDisplay();
+    }
+
+    /// <summary>
+    /// How do we want to display the trash objects 
+    /// </summary>
+    private void VolumeDisplay()
+    {
+        if (holdVolumeDisplay == volumeDisplay)
+            return;
+
+        VolumeDisplaySM();
+
+        holdVolumeDisplay = volumeDisplay;
+    }
+
+    private void VolumeDisplaySM()
+    {
+        // Cleaup if necessary 
+        switch (holdVolumeDisplay)
+        {
+            case VolumeDisplayState.Solid:
+                break;
+            case VolumeDisplayState.Dither:
+                break;
+            case VolumeDisplayState.Selected:
+                CleaupSelected(heldObjects);
+                break;
+        }
+
+        // How do we want to update all objects 
+        switch (volumeDisplay)
+        {
+            case VolumeDisplayState.Solid:
+                VolumeSolid();
+                break;
+            case VolumeDisplayState.Dither:
+                VolumeDither();
+                break;
+            case VolumeDisplayState.Selected:
+                VolumeSelected(heldObjects);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Change all meshes to solid material 
+    /// </summary>
+    private void VolumeSolid()
+    {
+        foreach (Node node in heldObjects)
+        {
+            node.GetComponent<Renderer>().material.SetFloat("_isDither", 0);
+        }
+    }
+
+    /// <summary>
+    /// Change non-selected meshes to a dither 
+    /// </summary>
+    private void VolumeDither()
+    {
+        foreach (Node node in heldObjects)
+        {
+            node.GetComponent<Renderer>().material.SetFloat("_isDither", node.IsSelected ? 0 : 1);
+        }
+    }
+
+    /// <summary>
+    /// Only display objects selected by slice tool 
+    /// </summary>
+    private void VolumeSelected(List<Node> nodes)
+    {
+        foreach (Node node in nodes)
+        {
+            if (node.IsSelected)
+                continue;
+
+            node.GetComponent<Renderer>().material.SetFloat("_isEnabled", 0);
+        }
+    }
+
+    /// <summary>
+    /// Enables all meshes given 
+    /// </summary>
+    private void CleaupSelected(List<Node> nodes)
+    {
+        foreach (Node node in nodes)
+        {
+            node.GetComponent<Renderer>().material.SetFloat("_isEnabled", 1);
+        }
     }
 
     /// <summary>
@@ -103,21 +210,62 @@ public class VolumeTool : MonoBehaviour
         {
             createCut = false;
 
-            foreach (GameObject current in currentSlice)
+            // Reset all previously selected nodes 
+            foreach (Node current in currentSlice)
             {
-                current.GetComponent<Renderer>().material = ditherMat;
+                current.IsSelected = false;
+
+                // Set old slice to default visualization dictated by volume display 
+                switch (volumeDisplay)
+                {
+                    case VolumeDisplayState.Selected:
+                        // Make sure not enabled 
+                        current.GetComponent<Renderer>().material.SetFloat("_isEnabled", 0);
+                        break;
+                    case VolumeDisplayState.Dither:
+                        current.GetComponent<Renderer>().material.SetFloat("_isDither", 1);
+                        break;
+                    case VolumeDisplayState.Solid:
+                    default:
+                        break;
+                }
+                current.GetComponent<Renderer>().material.SetColor("_Albedo", unSelectColor);
             }
+
             currentSlice.Clear();
 
+            // Get all new selected nodes 
             Collider[] nodes = Physics.OverlapBox(intersectPos, intersectSize, Quaternion.identity, editLayer);
             foreach (Collider node in nodes)
             {
-                node.GetComponent<Renderer>().material = selectedMat;
-                currentSlice.Add(node.gameObject);
+
+                Node current = node.GetComponent<Node>();
+                current.IsSelected = true;
+                currentSlice.Add(current);
+
+                // Visualize 
+                switch (volumeDisplay)
+                {
+                    case VolumeDisplayState.Selected:
+                        current.GetComponent<Renderer>().material.SetFloat("_isEnabled", 1);
+                        node.GetComponent<Renderer>().material.SetFloat("_isDither", 0);
+                        break;
+                    case VolumeDisplayState.Dither:
+                        node.GetComponent<Renderer>().material.SetFloat("_isDither", 0);
+                        break;
+                    case VolumeDisplayState.Solid:
+                    default:
+                        break;
+                }
+                node.GetComponent<Renderer>().material.SetColor("_Albedo", selectColor);
             }
         }
     }
 
+    /// <summary>
+    /// Generate a objects to occupy a node 
+    /// </summary>
+    /// <param name="nodes"></param>
     private void GenerateTrashObjs(List<OctNode> nodes)
     {
         // Reset list 
@@ -132,7 +280,7 @@ public class VolumeTool : MonoBehaviour
 
         foreach (OctNode node in nodes)
         {
-            GameObject current = Instantiate(templateObj, node.Position, Quaternion.identity);
+            Node current = Instantiate(templateObj, node.Position, Quaternion.identity).GetComponent<Node>();
             //current.transform.parent = this.transform;
 
             heldObjects.Add(current);
@@ -255,7 +403,7 @@ public class VolumeTool : MonoBehaviour
         /// Using gizmos, draw a wireframe representing this node and then
         /// call draws recussively on all children 
         /// </summary>
-        public void GizmosRecursiveDisplay(DisplayStates displayState)
+        public void GizmosRecursiveDisplay(GizmosDisplayStates displayState)
         {
             GizmosDisplayNode(displayState);
 
@@ -272,19 +420,19 @@ public class VolumeTool : MonoBehaviour
         /// <summary>
         /// Draw a wireframe representing this partitioning in space 
         /// </summary>
-        public void GizmosDisplayNode(DisplayStates displayState)
+        public void GizmosDisplayNode(GizmosDisplayStates displayState)
         {
 
             switch (displayState)
             {
-                case DisplayStates.All:
+                case GizmosDisplayStates.All:
                     Gizmos.DrawWireCube(position, Vector3.one * size);
                     break;
-                case DisplayStates.Leafs:
+                case GizmosDisplayStates.Leafs:
                     if(index == stoppingIndex)
                         Gizmos.DrawWireCube(position, Vector3.one * size);
                     break;
-                case DisplayStates.IdealVolume:
+                case GizmosDisplayStates.IdealVolume:
                     if (index == stoppingIndex && containsCollision == true)
                         Gizmos.DrawWireCube(position, Vector3.one * size);
                     break;
@@ -304,7 +452,7 @@ public class VolumeTool : MonoBehaviour
         if (root == null)
             return;
 
-        if(displayState != DisplayStates.Nothing) 
+        if(displayState != GizmosDisplayStates.Nothing) 
         { 
             root.GizmosRecursiveDisplay(displayState);
         }
