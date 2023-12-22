@@ -18,6 +18,7 @@ public class VolumeTool : MonoBehaviour
     [SerializeField] float startOctSize;
     [SerializeField] float minOctSize;
     [SerializeField] LayerMask testingLayer;
+    [SerializeField] GameObject objBuildAround;
 
     // The final leaf nodes that highlight the mesh 
     private List<OctNode> idealVolume;
@@ -155,7 +156,19 @@ public class VolumeTool : MonoBehaviour
     private void Update()
     {
         VolumeDisplay();
+        SelectorControls();
 
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            objBuildAround.SetActive(!objBuildAround.activeInHierarchy);
+        }
+    }
+
+    /// <summary>
+    /// Allows us to move the selctor in 3D space 
+    /// </summary>
+    private void SelectorControls()
+    {
         slicer.localScale = (Vector3)intersectSize - Vector3.forward;
         slicer.position = intersectPos;
 
@@ -185,7 +198,6 @@ public class VolumeTool : MonoBehaviour
         {
             intersectPos -= Vector3.forward * sliceMoveSpeed * Time.deltaTime;
         }
-
     }
 
     /// <summary>
