@@ -72,14 +72,79 @@ public class VolumeTool : MonoBehaviour
     public void RegenerateGrid()
     {
         // Reset current slice volums 
-        foreach (Node current in currentSlice)
+        /*while (heldObjects.Count > 0)
         {
-            current.GetComponent<Renderer>().material.SetFloat("_isDither", 1);// = ditherMat;
+            Destroy(heldObjects[0].gameObject);
+        }*/
+
+        foreach (Node node in heldObjects)
+        {
+            Destroy(node.gameObject);
         }
+        heldObjects.Clear();
         currentSlice.Clear();
 
         GeneratOctTree();
         GenerateTrashObjs(idealVolume);
+        VolumeDisplaySM();
+    }
+
+    /// <summary>
+    /// Selects a slice through of the nodes 
+    /// </summary>
+    public void SelectSlice()
+    {
+        createCut = false;
+
+        // Reset all previously selected nodes 
+        foreach (Node current in currentSlice)
+        {
+            current.IsSelected = false;
+
+            // Set old slice to default visualization dictated by volume display 
+            switch (volumeDisplay)
+            {
+                case VolumeDisplayState.Selected:
+                    // Make sure not enabled 
+                    current.GetComponent<Renderer>().material.SetFloat("_isEnabled", 0);
+                    break;
+                case VolumeDisplayState.Dither:
+                    current.GetComponent<Renderer>().material.SetFloat("_isDither", 1);
+                    break;
+                case VolumeDisplayState.Solid:
+                default:
+                    break;
+            }
+            current.GetComponent<Renderer>().material.SetColor("_Albedo", unSelectColor);
+        }
+
+        currentSlice.Clear();
+
+        // Get all new selected nodes 
+        Collider[] nodes = Physics.OverlapBox(intersectPos, intersectSize, Quaternion.identity, editLayer);
+        foreach (Collider node in nodes)
+        {
+
+            Node current = node.GetComponent<Node>();
+            current.IsSelected = true;
+            currentSlice.Add(current);
+
+            // Visualize 
+            switch (volumeDisplay)
+            {
+                case VolumeDisplayState.Selected:
+                    current.GetComponent<Renderer>().material.SetFloat("_isEnabled", 1);
+                    node.GetComponent<Renderer>().material.SetFloat("_isDither", 0);
+                    break;
+                case VolumeDisplayState.Dither:
+                    node.GetComponent<Renderer>().material.SetFloat("_isDither", 0);
+                    break;
+                case VolumeDisplayState.Solid:
+                default:
+                    break;
+            }
+            node.GetComponent<Renderer>().material.SetColor("_Albedo", selectColor);
+        }
     }
 
     private void Awake()
@@ -93,7 +158,6 @@ public class VolumeTool : MonoBehaviour
     void Start()
     {
         RegenerateGrid();
-        VolumeDisplaySM();
     }
 
     private void Update()
@@ -208,57 +272,7 @@ public class VolumeTool : MonoBehaviour
 
         if (createCut)
         {
-            createCut = false;
-
-            // Reset all previously selected nodes 
-            foreach (Node current in currentSlice)
-            {
-                current.IsSelected = false;
-
-                // Set old slice to default visualization dictated by volume display 
-                switch (volumeDisplay)
-                {
-                    case VolumeDisplayState.Selected:
-                        // Make sure not enabled 
-                        current.GetComponent<Renderer>().material.SetFloat("_isEnabled", 0);
-                        break;
-                    case VolumeDisplayState.Dither:
-                        current.GetComponent<Renderer>().material.SetFloat("_isDither", 1);
-                        break;
-                    case VolumeDisplayState.Solid:
-                    default:
-                        break;
-                }
-                current.GetComponent<Renderer>().material.SetColor("_Albedo", unSelectColor);
-            }
-
-            currentSlice.Clear();
-
-            // Get all new selected nodes 
-            Collider[] nodes = Physics.OverlapBox(intersectPos, intersectSize, Quaternion.identity, editLayer);
-            foreach (Collider node in nodes)
-            {
-
-                Node current = node.GetComponent<Node>();
-                current.IsSelected = true;
-                currentSlice.Add(current);
-
-                // Visualize 
-                switch (volumeDisplay)
-                {
-                    case VolumeDisplayState.Selected:
-                        current.GetComponent<Renderer>().material.SetFloat("_isEnabled", 1);
-                        node.GetComponent<Renderer>().material.SetFloat("_isDither", 0);
-                        break;
-                    case VolumeDisplayState.Dither:
-                        node.GetComponent<Renderer>().material.SetFloat("_isDither", 0);
-                        break;
-                    case VolumeDisplayState.Solid:
-                    default:
-                        break;
-                }
-                node.GetComponent<Renderer>().material.SetColor("_Albedo", selectColor);
-            }
+            SelectSlice();
         }
     }
 

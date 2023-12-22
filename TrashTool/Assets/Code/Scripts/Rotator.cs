@@ -30,8 +30,8 @@ public class Rotator : MonoBehaviour
         if (!dragging)
             return;
 
-        Vector2 mouseInput = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
-        mouseInput *= -rotSpeed * Time.deltaTime;
+        Vector2 mouseInput = new Vector2(Input.GetAxis("Mouse X"), -Input.GetAxis("Mouse Y"));
+        mouseInput *= rotSpeed * Time.deltaTime;
 
         rb.AddTorque(Vector3.down * mouseInput.x);
         rb.AddTorque(Vector3.right * mouseInput.y);
