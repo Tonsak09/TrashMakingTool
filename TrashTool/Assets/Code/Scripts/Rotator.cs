@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CamController : MonoBehaviour
+public class Rotator : MonoBehaviour
 {
     [SerializeField] float rotSpeed;
 
