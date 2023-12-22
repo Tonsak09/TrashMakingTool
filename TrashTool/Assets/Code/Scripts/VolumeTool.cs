@@ -281,7 +281,7 @@ public class VolumeTool : MonoBehaviour
         foreach (OctNode node in nodes)
         {
             Node current = Instantiate(templateObj, node.Position, Quaternion.identity).GetComponent<Node>();
-            //current.transform.parent = this.transform;
+            current.transform.parent = this.transform;
 
             heldObjects.Add(current);
         }
@@ -447,7 +447,7 @@ public class VolumeTool : MonoBehaviour
         {
             Gizmos.DrawWireCube(intersectPos, intersectSize);
         }
-
+        Gizmos.matrix = transform.localToWorldMatrix;
 
         if (root == null)
             return;
