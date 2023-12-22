@@ -1191,6 +1191,7 @@ GameObject:
   m_Component:
   - component: {fileID: 579652708}
   - component: {fileID: 579652709}
+  - component: {fileID: 579652712}
   - component: {fileID: 579652711}
   - component: {fileID: 579652710}
   m_Layer: 0
@@ -1280,6 +1281,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rotSpeed: 300
+--- !u!114 &579652712
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 579652707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 153deb01ec3e1534fb4f0a2454c331a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  camera: {fileID: 330585545}
+  nodeRayCastLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  timeForClick: 0.5
 --- !u!1 &812642814
 GameObject:
   m_ObjectHideFlags: 0

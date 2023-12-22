@@ -27,7 +27,7 @@ public class VolumeTool : MonoBehaviour
     [SerializeField] GameObject templateObj;
     [SerializeField] List<Node> heldObjects;
 
-    [Header("Edits")]
+    [Header("Selection")]
     [SerializeField] Vector2 intersectSize;
     [SerializeField] Vector3 intersectPos;
     [SerializeField] Transform slicer;
@@ -166,6 +166,8 @@ public class VolumeTool : MonoBehaviour
         {
             objBuildAround.SetActive(!objBuildAround.activeInHierarchy);
         }
+
+        
     }
 
     /// <summary>
