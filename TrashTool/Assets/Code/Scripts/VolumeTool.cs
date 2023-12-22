@@ -35,6 +35,8 @@ public class VolumeTool : MonoBehaviour
     [Space]
     [SerializeField] Color selectColor;
     [SerializeField] Color unSelectColor;
+    [SerializeField] int selectLayer;
+    [SerializeField] int unSelectLayer;
     [Space]
     [SerializeField] LayerMask editLayer;
     [SerializeField] TMP_Dropdown volumeDisDrop;
@@ -109,12 +111,13 @@ public class VolumeTool : MonoBehaviour
                     break;
             }
             current.GetComponent<Renderer>().material.SetColor("_Albedo", unSelectColor);
+            current.gameObject.layer = unSelectLayer;
         }
 
         currentSlice.Clear();
 
         // Get all new selected nodes 
-        Collider[] nodes = Physics.OverlapBox(intersectPos, intersectSize, Quaternion.identity, editLayer);
+        Collider[] nodes = Physics.OverlapBox(intersectPos, intersectSize / 2.0f, Quaternion.identity, editLayer);
         foreach (Collider node in nodes)
         {
 
@@ -137,6 +140,7 @@ public class VolumeTool : MonoBehaviour
                     break;
             }
             node.GetComponent<Renderer>().material.SetColor("_Albedo", selectColor);
+            current.gameObject.layer = selectLayer;
         }
     }
 

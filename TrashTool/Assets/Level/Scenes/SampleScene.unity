@@ -1242,9 +1242,11 @@ MonoBehaviour:
   sliceMoveSpeed: 2
   selectColor: {r: 0.22086148, g: 0.58167684, b: 0.8867924, a: 1}
   unSelectColor: {r: 0.44313726, g: 0.44313726, b: 0.44313726, a: 1}
+  selectLayer: 6
+  unSelectLayer: 7
   editLayer:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 192
   volumeDisDrop: {fileID: 1764854215}
   volumeDisplay: 0
   currentSlice: []

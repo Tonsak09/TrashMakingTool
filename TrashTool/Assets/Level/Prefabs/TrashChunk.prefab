@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 9200761668849756060}
   - component: {fileID: 9200761668849756063}
   - component: {fileID: 1224712436714973911}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: TrashChunk
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -110,3 +110,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df9661ffe0a7aee49ae2b7eef6dfcf3d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  state: 0
