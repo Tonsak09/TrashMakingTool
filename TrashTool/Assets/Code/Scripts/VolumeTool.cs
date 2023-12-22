@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using static UnityEditor.Experimental.GraphView.GraphView;
+using TMPro;
 
 public class VolumeTool : MonoBehaviour
 {
@@ -23,14 +23,10 @@ public class VolumeTool : MonoBehaviour
     private List<OctNode> idealVolume;
 
     [Header("Spawning")]
-    [SerializeField] bool regenerate;
     [SerializeField] GameObject templateObj;
     [SerializeField] List<Node> heldObjects;
 
     [Header("Edits")]
-    [SerializeField] bool activateEditTool;
-    [Space]
-    [SerializeField] bool createCut;
     [SerializeField] Vector2 intersectSize;
     [SerializeField] Vector3 intersectPos;
     [Space]
@@ -38,6 +34,7 @@ public class VolumeTool : MonoBehaviour
     [SerializeField] Color unSelectColor;
     [Space]
     [SerializeField] LayerMask editLayer;
+    [SerializeField] TMP_Dropdown volumeDisDrop;
     [SerializeField] VolumeDisplayState volumeDisplay;
 
     public List<Node> currentSlice;
@@ -72,11 +69,6 @@ public class VolumeTool : MonoBehaviour
     public void RegenerateGrid()
     {
         // Reset current slice volums 
-        /*while (heldObjects.Count > 0)
-        {
-            Destroy(heldObjects[0].gameObject);
-        }*/
-
         foreach (Node node in heldObjects)
         {
             Destroy(node.gameObject);
@@ -94,8 +86,6 @@ public class VolumeTool : MonoBehaviour
     /// </summary>
     public void SelectSlice()
     {
-        createCut = false;
-
         // Reset all previously selected nodes 
         foreach (Node current in currentSlice)
         {
@@ -162,14 +152,8 @@ public class VolumeTool : MonoBehaviour
 
     private void Update()
     {
-        if(regenerate)
-        {
-            RegenerateGrid();
-            regenerate = false;
-        }
-
-        EditTool();
         VolumeDisplay();
+
     }
 
     /// <summary>
@@ -177,6 +161,9 @@ public class VolumeTool : MonoBehaviour
     /// </summary>
     private void VolumeDisplay()
     {
+        volumeDisplay = (VolumeDisplayState)volumeDisDrop.value;
+
+
         if (holdVolumeDisplay == volumeDisplay)
             return;
 
@@ -258,21 +245,6 @@ public class VolumeTool : MonoBehaviour
         foreach (Node node in nodes)
         {
             node.GetComponent<Renderer>().material.SetFloat("_isEnabled", 1);
-        }
-    }
-
-    /// <summary>
-    /// This allows you to make 3D slices of the mesh 
-    /// to then select and edit individual volumes 
-    /// </summary>
-    private void EditTool()
-    {
-        if (!activateEditTool)
-            return;
-
-        if (createCut)
-        {
-            SelectSlice();
         }
     }
 
@@ -457,10 +429,8 @@ public class VolumeTool : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        if(activateEditTool)
-        {
-            Gizmos.DrawWireCube(intersectPos, intersectSize);
-        }
+        Gizmos.DrawWireCube(intersectPos, intersectSize);
+
         Gizmos.matrix = transform.localToWorldMatrix;
 
         if (root == null)

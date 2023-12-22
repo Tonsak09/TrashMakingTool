@@ -1232,12 +1232,9 @@ MonoBehaviour:
   testingLayer:
     serializedVersion: 2
     m_Bits: 1
-  regenerate: 0
   templateObj: {fileID: 9200761668849756062, guid: affed2ec9dd877b4fa02b3e968fa213e,
     type: 3}
   heldObjects: []
-  activateEditTool: 1
-  createCut: 0
   intersectSize: {x: 4, y: 4}
   intersectPos: {x: 0, y: 0, z: 0.06}
   selectColor: {r: 0.22086148, g: 0.58167684, b: 0.8867924, a: 1}
@@ -1245,6 +1242,7 @@ MonoBehaviour:
   editLayer:
     serializedVersion: 2
     m_Bits: 64
+  volumeDisDrop: {fileID: 1764854215}
   volumeDisplay: 0
   currentSlice: []
   displayState: 3
