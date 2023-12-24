@@ -33,16 +33,16 @@ public class VolumeTool : MonoBehaviour
     [SerializeField] Transform slicer;
     [SerializeField] float sliceMoveSpeed;
     [Space]
-    [SerializeField] Color selectColor;
-    [SerializeField] Color unSelectColor;
-    [SerializeField] int selectLayer;
-    [SerializeField] int unSelectLayer;
-    [Space]
-    [SerializeField] LayerMask editLayer;
+    //[SerializeField] Color selectColor;
+    //[SerializeField] Color unSelectColor;
     [SerializeField] TMP_Dropdown volumeDisDrop;
     [SerializeField] VolumeDisplayState volumeDisplay;
+    [Space]
+    [SerializeField] int selectLayer;
+    [SerializeField] int unSelectLayer;
+    [SerializeField] LayerMask editLayer;
 
-    public List<Node> currentSlice;
+    private List<Node> currentSlice;
 
     private VolumeDisplayState holdVolumeDisplay;
 
@@ -73,6 +73,8 @@ public class VolumeTool : MonoBehaviour
     /// </summary>
     public void RegenerateGrid()
     {
+        this.transform.rotation = Quaternion.identity;
+
         // Reset current slice volums 
         foreach (Node node in heldObjects)
         {
@@ -94,7 +96,7 @@ public class VolumeTool : MonoBehaviour
         // Reset all previously selected nodes 
         foreach (Node current in currentSlice)
         {
-            current.IsSelected = false;
+            //current.IsSelected = false;
 
             // Set old slice to default visualization dictated by volume display 
             switch (volumeDisplay)
@@ -110,7 +112,10 @@ public class VolumeTool : MonoBehaviour
                 default:
                     break;
             }
-            current.GetComponent<Renderer>().material.SetColor("_Albedo", unSelectColor);
+            
+            current.SetSelect(false);
+
+            //current.GetComponent<Renderer>().material.SetColor("_Albedo", unSelectColor);
             current.gameObject.layer = unSelectLayer;
         }
 
@@ -122,7 +127,7 @@ public class VolumeTool : MonoBehaviour
         {
 
             Node current = node.GetComponent<Node>();
-            current.IsSelected = true;
+            //current.IsSelected = true;
             currentSlice.Add(current);
 
             // Visualize 
@@ -139,7 +144,8 @@ public class VolumeTool : MonoBehaviour
                 default:
                     break;
             }
-            node.GetComponent<Renderer>().material.SetColor("_Albedo", selectColor);
+            current.SetSelect(true);
+            //node.GetComponent<Renderer>().material.SetColor("_Albedo", selectColor);
             current.gameObject.layer = selectLayer;
         }
     }
@@ -222,6 +228,11 @@ public class VolumeTool : MonoBehaviour
         holdVolumeDisplay = volumeDisplay;
     }
 
+    /// <summary>
+    /// Call to update the visuals of the nodes. It is 
+    /// recommended to call VolumeDisplay for continous 
+    /// updates  
+    /// </summary>
     private void VolumeDisplaySM()
     {
         // Cleaup if necessary 
@@ -323,6 +334,9 @@ public class VolumeTool : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Begins the recurssive generation of the oct tree 
+    /// </summary>
     private void GeneratOctTree()
     {
         idealVolume.Clear();

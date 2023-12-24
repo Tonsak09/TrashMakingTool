@@ -12,6 +12,21 @@ public class NodeModifier : MonoBehaviour
     private bool inClick;
     private float timer;
 
+
+    private void ClickLogic()
+    {
+        RaycastHit hit;
+        Ray ray = camera.ScreenPointToRay(Input.mousePosition);
+
+        if (Physics.Raycast(ray, out hit, 100, nodeRayCastLayer))
+        {
+            Transform objectHit = hit.transform;
+            //hit.collider.GetComponent<Renderer>().material.SetColor("_Albedo", Color.red);
+            hit.collider.GetComponent<Node>().SetNextState();
+        }
+    }
+
+
     void Update()
     {
         if (Input.GetMouseButtonDown(0))
@@ -31,14 +46,9 @@ public class NodeModifier : MonoBehaviour
 
         if (Input.GetMouseButtonUp(0))
         {
-            RaycastHit hit;
-            Ray ray = camera.ScreenPointToRay(Input.mousePosition);
-
-            if (Physics.Raycast(ray, out hit, 100, nodeRayCastLayer))
-            {
-                Transform objectHit = hit.transform;
-                hit.collider.GetComponent<Renderer>().material.SetColor("_Albedo", Color.red);
-            }
+            ClickLogic();
         }
     }
+
+    
 }

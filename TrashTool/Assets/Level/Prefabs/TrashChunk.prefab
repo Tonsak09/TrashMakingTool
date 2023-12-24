@@ -111,3 +111,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   state: 0
+  stateColors:
+  - SelectColor: {r: 1, g: 0, b: 0, a: 1}
+    UnSelectColor: {r: 0.6603774, g: 0.36383054, b: 0.36383054, a: 1}
+  - SelectColor: {r: 0.32193407, g: 0.8113208, b: 0.28625846, a: 1}
+    UnSelectColor: {r: 0.50054294, g: 0.6415094, b: 0.47447488, a: 1}
+  - SelectColor: {r: 0.4901939, g: 0.09131358, b: 0.8490566, a: 1}
+    UnSelectColor: {r: 0.5420143, g: 0.48444286, b: 0.5943396, a: 1}
+  mRenderer: {fileID: 0}
